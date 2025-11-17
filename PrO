@@ -1,0 +1,26 @@
+-- Place this in a LocalScript inside StarterPlayerScripts
+
+local Lighting = game:GetService("Lighting")
+
+-- Set the sky to grey and low-detail
+Lighting.Sky = Instance.new("Sky")
+Lighting.Sky.SkyboxBk = ""  -- Empty strings remove the skybox textures
+Lighting.Sky.SkyboxDn = ""
+Lighting.Sky.SkyboxFt = ""
+Lighting.Sky.SkyboxLf = ""
+Lighting.Sky.SkyboxRt = ""
+Lighting.Sky.SkyboxUp = ""
+Lighting.Sky.SkyboxCelestialBodiesShown = false  -- Hide sun/moon
+
+-- Force ambient grey
+Lighting.Ambient = Color3.fromRGB(128, 128, 128)
+Lighting.OutdoorAmbient = Color3.fromRGB(128, 128, 128)
+
+-- Remove fog
+Lighting.FogEnd = 100000  -- Very far away
+Lighting.FogStart = 0
+Lighting.FogColor = Color3.fromRGB(128, 128, 128)
+
+-- Optional: Reduce brightness and remove shadows for even lower graphics
+Lighting.Brightness = 0
+Lighting.GlobalShadows = false
