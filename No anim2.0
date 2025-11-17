@@ -1,0 +1,47 @@
+-- LocalScript in StarterPlayerScripts
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+local humanoid = character:WaitForChild("Humanoid")
+
+-- Replace with your idle animation ID
+local idleAnimationId = "rbxassetid://507766666"
+
+-- Create idle animation
+local idleAnimation = Instance.new("Animation")
+idleAnimation.AnimationId = idleAnimationId
+
+local animator = humanoid:FindFirstChildOfClass("Animator")
+if not animator then
+    animator = Instance.new("Animator")
+    animator.Parent = humanoid
+end
+
+local idleTrack = animator:LoadAnimation(idleAnimation)
+idleTrack.Priority = Enum.AnimationPriority.Idle
+idleTrack:Play()
+
+-- Function to stop movement animations but not attacks
+local function enforceIdle()
+    for _, track in pairs(animator:GetPlayingAnimationTracks()) do
+        if track.Priority == Enum.AnimationPriority.Movement then
+            track:Stop() -- Stop walking/running/jumping animations
+        end
+    end
+    if not idleTrack.IsPlaying then
+        idleTrack:Play() -- Always play idle
+    end
+end
+
+-- Optional: keep idle animation speed synced with movement speed (looks natural)
+local function syncIdleWithSpeed()
+    local speed = humanoid.MoveDirection.Magnitude
+    idleTrack:AdjustSpeed(1 + speed/8) -- Adjust speed slightly if moving
+end
+
+-- Main loop
+while true do
+    enforceIdle()
+    syncIdleWithSpeed()
+    task.wait(0.1)
+end
