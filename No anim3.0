@@ -1,0 +1,42 @@
+-- LocalScript under StarterPlayerScripts
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+local humanoid = character:WaitForChild("Humanoid")
+
+-- Idle animation ID
+local idleAnimationId = "rbxassetid://507766666"
+
+-- Create and load idle animation
+local idleAnimation = Instance.new("Animation")
+idleAnimation.AnimationId = idleAnimationId
+
+local animator = humanoid:FindFirstChildOfClass("Animator")
+if not animator then
+    animator = Instance.new("Animator")
+    animator.Parent = humanoid
+end
+
+-- Load idle animation
+local idleTrack = animator:LoadAnimation(idleAnimation)
+idleTrack.Priority = Enum.AnimationPriority.Action -- Use Action priority to override everything visually
+idleTrack:Play()
+
+-- Function to reapply idle if it stops
+local function maintainIdle()
+    for _, track in pairs(animator:GetPlayingAnimationTracks()) do
+        -- Only stop other movement animations (walk/run/jump) but leave Tool/attack logic intact
+        if track.Priority == Enum.AnimationPriority.Movement then
+            track:Stop()
+        end
+    end
+    if not idleTrack.IsPlaying then
+        idleTrack:Play()
+    end
+end
+
+-- Main loop
+while true do
+    maintainIdle()
+    task.wait(0.05)
+end
