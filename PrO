@@ -1,26 +1,39 @@
--- Place this in a LocalScript inside StarterPlayerScripts
+-- LocalScript under StarterPlayerScripts
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
 
-local Lighting = game:GetService("Lighting")
+local player = Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+local humanoid = character:WaitForChild("Humanoid")
+local hrp = character:WaitForChild("HumanoidRootPart")
 
--- Set the sky to grey and low-detail
-Lighting.Sky = Instance.new("Sky")
-Lighting.Sky.SkyboxBk = ""  -- Empty strings remove the skybox textures
-Lighting.Sky.SkyboxDn = ""
-Lighting.Sky.SkyboxFt = ""
-Lighting.Sky.SkyboxLf = ""
-Lighting.Sky.SkyboxRt = ""
-Lighting.Sky.SkyboxUp = ""
-Lighting.Sky.SkyboxCelestialBodiesShown = false  -- Hide sun/moon
+-- Idle animation ID
+local idleAnimationId = "rbxassetid://507766666"
 
--- Force ambient grey
-Lighting.Ambient = Color3.fromRGB(128, 128, 128)
-Lighting.OutdoorAmbient = Color3.fromRGB(128, 128, 128)
+-- Load idle animation
+local animator = humanoid:FindFirstChildOfClass("Animator")
+if not animator then
+    animator = Instance.new("Animator")
+    animator.Parent = humanoid
+end
 
--- Remove fog
-Lighting.FogEnd = 100000  -- Very far away
-Lighting.FogStart = 0
-Lighting.FogColor = Color3.fromRGB(128, 128, 128)
+local idleAnimation = Instance.new("Animation")
+idleAnimation.AnimationId = idleAnimationId
+local idleTrack = animator:LoadAnimation(idleAnimation)
+idleTrack.Priority = Enum.AnimationPriority.Action
+idleTrack:Play()
 
--- Optional: Reduce brightness and remove shadows for even lower graphics
-Lighting.Brightness = 0
-Lighting.GlobalShadows = false
+-- Keep idle visually even while moving or attacking
+RunService.RenderStepped:Connect(function()
+    -- Reapply the idle track if it stops
+    if not idleTrack.IsPlaying then
+        idleTrack:Play()
+    end
+    
+    -- Stop all movement animations to prevent them from overriding idle
+    for _, track in pairs(animator:GetPlayingAnimationTracks()) do
+        if track.Priority == Enum.AnimationPriority.Movement then
+            track:Stop()
+        end
+    end
+end)
