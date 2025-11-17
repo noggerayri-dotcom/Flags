@@ -1,51 +1,56 @@
--- Always Classic R6 Idle Script
+-- Classic R6 Idle + M1 Hit Detection for Blox-Fruits-style Weapons
 -- Place in StarterPlayerScripts or StarterCharacterScripts
 
 local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
 local player = Players.LocalPlayer
-
--- Wait for character to load
 local character = player.Character or player.CharacterAdded:Wait()
 local humanoid = character:WaitForChild("Humanoid")
+local mouse = player:GetMouse()
 
 -- Classic R6 idle animation
 local idleAnimation = Instance.new("Animation")
 idleAnimation.AnimationId = "rbxassetid://180435571" -- Classic R6 idle
 local idleTrack = humanoid:LoadAnimation(idleAnimation)
-idleTrack.Priority = Enum.AnimationPriority.Action -- High priority to override other animations
+idleTrack.Priority = Enum.AnimationPriority.Action
 idleTrack.Looped = true
 idleTrack:Play()
 
--- Function to force idle animation continuously
+-- Force idle constantly
 local function forceIdle()
-    -- Stop all other animations
     for _, track in pairs(humanoid:GetPlayingAnimationTracks()) do
         if track ~= idleTrack then
             track:Stop()
         end
     end
-    
-    -- Play idle if not already
     if not idleTrack.IsPlaying then
         idleTrack:Play()
     end
 end
 
--- Connect to humanoid state changes
-humanoid.Running:Connect(forceIdle)
-humanoid.Jumping:Connect(forceIdle)
-humanoid.FreeFalling:Connect(forceIdle)
-humanoid.Swimming:Connect(forceIdle)
-humanoid.Climbing:Connect(forceIdle)
-humanoid.Seated:Connect(forceIdle)
-humanoid.Died:Connect(function()
-    idleTrack:Stop()
-end)
+RunService.RenderStepped:Connect(forceIdle)
 
--- Loop check to ensure idle always plays
-spawn(function()
-    while humanoid.Parent do
-        forceIdle()
-        wait(0.1)
+-- Weapon hit detection parameters
+local HIT_DISTANCE = 5 -- Adjust range
+local DAMAGE = 10
+
+-- Function to simulate weapon hit
+local function performHit()
+    local rootPos = character.HumanoidRootPart.Position
+    local mousePos = mouse.Hit.Position
+    local direction = (mousePos - rootPos).Unit
+
+    local ray = Ray.new(rootPos, direction * HIT_DISTANCE)
+    local hitPart, hitPos = workspace:FindPartOnRayWithIgnoreList(ray, {character})
+    if hitPart and hitPart.Parent then
+        local targetHum = hitPart.Parent:FindFirstChild("Humanoid")
+        if targetHum and targetHum ~= humanoid then
+            targetHum:TakeDamage(DAMAGE)
+        end
     end
+end
+
+-- Connect M1
+mouse.Button1Down:Connect(function()
+    performHit()
 end)
