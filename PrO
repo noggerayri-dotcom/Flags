@@ -1,39 +1,24 @@
--- LocalScript under StarterPlayerScripts
-local Players = game:GetService("Players")
-local RunService = game:GetService("RunService")
+-- Classic R6 Idle Animation Script
+-- Place in StarterPlayerScripts or StarterCharacterScripts
 
+local Players = game:GetService("Players")
 local player = Players.LocalPlayer
+
+-- Wait for character
 local character = player.Character or player.CharacterAdded:Wait()
 local humanoid = character:WaitForChild("Humanoid")
-local hrp = character:WaitForChild("HumanoidRootPart")
 
--- Idle animation ID
-local idleAnimationId = "rbxassetid://507766666"
-
--- Load idle animation
-local animator = humanoid:FindFirstChildOfClass("Animator")
-if not animator then
-    animator = Instance.new("Animator")
-    animator.Parent = humanoid
+-- Stop all default animations to avoid conflicts
+for _, track in pairs(humanoid:GetPlayingAnimationTracks()) do
+    track:Stop()
 end
 
+-- Create the classic R6 idle animation
 local idleAnimation = Instance.new("Animation")
-idleAnimation.AnimationId = idleAnimationId
-local idleTrack = animator:LoadAnimation(idleAnimation)
-idleTrack.Priority = Enum.AnimationPriority.Action
-idleTrack:Play()
+idleAnimation.AnimationId = "rbxassetid://180435571" -- Classic R6 idle animation
 
--- Keep idle visually even while moving or attacking
-RunService.RenderStepped:Connect(function()
-    -- Reapply the idle track if it stops
-    if not idleTrack.IsPlaying then
-        idleTrack:Play()
-    end
-    
-    -- Stop all movement animations to prevent them from overriding idle
-    for _, track in pairs(animator:GetPlayingAnimationTracks()) do
-        if track.Priority == Enum.AnimationPriority.Movement then
-            track:Stop()
-        end
-    end
-end)
+-- Load the animation
+local idleTrack = humanoid:LoadAnimation(idleAnimation)
+idleTrack.Priority = Enum.AnimationPriority.Idle -- Standard idle priority
+idleTrack.Looped = true
+idleTrack:Play()
